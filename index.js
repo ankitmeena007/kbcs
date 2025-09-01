@@ -192,12 +192,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const showEndScreen = (isWinner = false) => {
         if (isWinner) {
-            endTitle.textContent = "Congratulations! You are a Crorepati!";
-            endPrize.textContent = `You have won ${PRIZE_MONEY[0]}!`;
+            const prizeWon = PRIZE_MONEY[0];
+            endTitle.textContent = "Congratulations!";
+            endPrize.textContent = `You have won the grand prize of ${prizeWon}!`;
         } else {
-            endTitle.textContent = "Game Over!";
             const prizeWon = currentLevel > 0 ? PRIZE_MONEY[TOTAL_LEVELS - currentLevel] : "₹ 0";
-            endPrize.textContent = `You walk away with ${prizeWon}.`;
+            if (currentLevel > 0) {
+                endTitle.textContent = "Well Played!";
+                endPrize.textContent = `You have won ${prizeWon}.`;
+            } else {
+                endTitle.textContent = "Game Over";
+                endPrize.textContent = `You walk away with ${prizeWon}.`;
+            }
         }
         showScreen('end');
     };
