@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UPSC KBC Quiz</title>
+  <link rel="stylesheet" href="index.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.16.0",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+
+  <!-- Main Application Container -->
+  <div id="app-container">
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="flex flex-col items-center justify-center h-screen text-white text-center p-4 bg-gradient-to-br from-gray-900 via-blue-900 to-gray-800">
+      <div class="bg-black bg-opacity-50 p-10 rounded-2xl shadow-2xl backdrop-blur-sm border border-blue-500/30">
+        <h1 class="text-6xl md:text-8xl font-bold text-yellow-400 mb-2 tracking-wider font-kbc-title">KBCS</h1>
+        <p class="text-xl md:text-2xl font-semibold text-yellow-200 mb-6">(Kaun Banega Civil Servant)</p>
+        <p id="start-screen-levels" class="text-lg md:text-xl text-blue-200 mb-8 max-w-2xl"></p>
+        <button id="start-button" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold text-2xl px-12 py-4 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out">
+          Play Now
+        </button>
+        <p id="start-error" class="text-red-500 mt-6 text-lg hidden"></p>
+      </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="hidden min-h-screen w-full flex flex-col md:flex-row items-center md:items-start justify-center p-4 bg-gradient-to-br from-gray-900 via-blue-900 to-gray-800 space-y-4 md:space-y-0 md:space-x-4">
+        <div class="w-full md:w-auto md:order-2 flex flex-col items-center space-y-4">
+            <!-- Lifelines -->
+            <div id="lifelines-container" class="flex justify-center items-center space-x-4 md:space-x-6 text-white mb-4">
+                <button id="lifeline-fiftyFifty" aria-label="Use 50-50 lifeline" class="lifeline-button">
+                    <span class="text-lg font-bold">50:50</span>
+                </button>
+                <button id="lifeline-askAI" aria-label="Use Ask AI lifeline" class="lifeline-button">
+                    <span class="text-lg font-bold">Ask AI</span>
+                </button>
+            </div>
+            <!-- Timer -->
+            <div id="timer-container" class="relative w-24 h-24 flex items-center justify-center mt-4 md:mt-0">
+                <svg class="absolute w-full h-full" viewBox="0 0 36 36">
+                    <path class="text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="2" />
+                    <path id="timer-progress" class="text-green-400 transition-all duration-1000 ease-linear" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="100, 100" stroke-linecap="round" transform="rotate(90 18 18)" />
+                </svg>
+                <span id="timer-text" class="text-4xl font-bold text-green-400">60</span>
+            </div>
+            <!-- Question Box -->
+            <div id="question-box" class="w-full max-w-4xl text-white flex flex-col items-center">
+                <div class="w-full bg-black bg-opacity-40 p-6 rounded-lg border border-blue-500/30 text-center mb-6">
+                    <div id="question-tags" class="flex justify-center space-x-2 mb-4"></div>
+                    <h2 id="question-text" class="text-2xl lg:text-3xl font-semibold leading-relaxed"></h2>
+                </div>
+                <div id="options-container" class="w-full grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+        </div>
+        <!-- Prize Ladder -->
+        <div id="prize-ladder-container" class="w-full md:w-auto md:order-1 mt-4 md:mt-0">
+            <div class="w-full md:w-64 lg:w-72 bg-black bg-opacity-40 p-4 rounded-lg border border-blue-500/30 text-white">
+                <ul id="prize-list" class="flex flex-row-reverse md:flex-col justify-center"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Explanation Screen -->
+    <div id="explanation-screen" class="hidden flex flex-col items-center justify-center min-h-screen text-white p-4 bg-gradient-to-br from-gray-900 via-blue-900 to-gray-800">
+      <div class="bg-black bg-opacity-50 p-8 rounded-2xl shadow-2xl backdrop-blur-sm border border-blue-500/30 max-w-4xl w-full space-y-6">
+        <div class="text-center">
+          <h1 id="explanation-title" class="text-5xl md:text-6xl font-bold mb-6"></h1>
+        </div>
+        <div>
+          <h2 id="explanation-question" class="text-2xl lg:text-3xl font-semibold text-blue-200 mb-4"></h2>
+          <p class="text-xl lg:text-2xl">
+            <span class="font-bold text-yellow-400">Correct Answer: </span>
+            <span id="explanation-answer" class="text-green-400"></span>
+          </p>
+        </div>
+        <div class="border-t border-blue-500/30 pt-6">
+            <h3 class="text-xl font-bold text-yellow-400 mb-2">Explanation</h3>
+            <p id="explanation-text" class="text-lg text-blue-200 leading-relaxed"></p>
+        </div>
+        <div class="text-center pt-4">
+            <button id="proceed-button" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold text-2xl px-12 py-4 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- End Screen -->
+    <div id="end-screen" class="hidden flex flex-col items-center justify-center h-screen text-white text-center p-4 bg-gradient-to-br from-gray-900 via-blue-900 to-gray-800">
+        <div class="bg-black bg-opacity-50 p-10 rounded-2xl shadow-2xl backdrop-blur-sm border border-blue-500/30">
+            <h1 id="end-title" class="text-5xl md:text-7xl font-bold text-yellow-400 mb-4 tracking-wider" style={{ fontFamily: 'serif' }}></h1>
+            <p id="end-prize" class="text-2xl md:text-3xl text-blue-200 mb-8"></p>
+            <button id="restart-button" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold text-2xl px-12 py-4 rounded-full shadow-lg transform hover:scale-105 transition-transform duration-300 ease-in-out">
+            Play Again
+            </button>
+        </div>
+    </div>
+
+    <!-- Ask AI Modal -->
+    <div id="ask-ai-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <div class="bg-gradient-to-br from-blue-900 to-gray-900 rounded-2xl shadow-2xl border border-yellow-400/50 text-white max-w-lg w-full p-6 relative animate-fade-in-up">
+        <button id="modal-close-button" class="absolute top-3 right-3 text-gray-400 hover:text-white text-3xl" aria-label="Close modal">&times;</button>
+        <h2 class="text-3xl font-bold text-yellow-400 mb-4 text-center">Expert Advice</h2>
+        <div id="modal-loading-state" class="hidden flex flex-col items-center justify-center h-48">
+            <svg class="animate-spin h-12 w-12 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="mt-4 text-lg">Consulting the expert...</p>
+        </div>
+        <div id="modal-advice-state" class="hidden space-y-4 text-lg">
+            <p><span class="font-bold text-yellow-300">The expert suggests the answer is:</span></p>
+            <p id="modal-answer" class="bg-black/30 p-3 rounded-lg border border-blue-500/30 text-center font-semibold text-xl"></p>
+            <p><span class="font-bold text-yellow-300">Explanation:</span></p>
+            <p id="modal-explanation" class="text-blue-200"></p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="data.js"></script>
+  <script src="index.js"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
